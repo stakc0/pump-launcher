@@ -1,4 +1,5 @@
 import {Connection,Keypair,PublicKey,Transaction} from '@solana/web3.js';
+import fs from 'node:fs';
 import {OnlinePumpSdk,PUMP_SDK} from '@pump-fun/pump-sdk';
 import BN from 'bn.js';
 import {cfg,assertConfig} from '../src/config.mjs';
@@ -37,5 +38,8 @@ const ix=await PUMP_SDK.createV2Instruction({
   pumpQuote:resolved.pumpQuote,
 });
 const tx=new Transaction().add(ix);const latest=await connection.getLatestBlockhash();tx.recentBlockhash=latest.blockhash;tx.feePayer=user;
+let signer=null;if(process.env.SIMULATE==='true'||process.env.BROADCAST_MAINNET==='true'){signer=Keypair.fromSecretKey(Uint8Array.from(JSON.parse(fs.readFileSync(process.env.PUMP_LAUNCHER_KEYPAIR_PATH||'/root/.hermes/credentials/pump-launcher-deployer.json','utf8'))));if(!signer.publicKey.equals(user))throw new Error('signer public key mismatch');}
+if(process.env.SIMULATE==='true'){tx.sign(signer,replica);const sim=await connection.simulateTransaction(tx,[signer,replica]);console.log(JSON.stringify({event:'simulation',err:sim.value.err,logs:sim.value.logs,unitsConsumed:sim.value.unitsConsumed}));if(sim.value.err)throw new Error('mainnet simulation failed');}
+if(process.env.BROADCAST_MAINNET==='true'){if(process.env.CONFIRM_MAINNET!=='YES')throw new Error('set CONFIRM_MAINNET=YES for mainnet broadcast');tx.sign(signer,replica);const signature=await connection.sendRawTransaction(tx.serialize(),{skipPreflight:false,maxRetries:3});const confirmation=await connection.confirmTransaction({signature,blockhash:latest.blockhash,lastValidBlockHeight:latest.lastValidBlockHeight},'confirmed');if(confirmation.value.err)throw new Error(`mainnet confirmation failed: ${JSON.stringify(confirmation.value.err)}`);await upsert('pump_redeployments',{source_mint:job.source_mint,replica_mint:replica.publicKey.toBase58(),creator_wallet:user.toBase58(),quote_mint:cfg.quoteMint,status:'confirmed',tx_signature:signature,attempts:Number(job.attempts||0)+1,confirmed_at:new Date().toISOString(),updated_at:new Date().toISOString()},'source_mint');console.log(JSON.stringify({event:'mainnet_confirmed',signature,replicaMint:replica.publicKey.toBase58()}));process.exit(0);}
 await upsert('pump_redeployments',{source_mint:job.source_mint,replica_mint:replica.publicKey.toBase58(),creator_wallet:user.toBase58(),quote_mint:cfg.quoteMint,status:'building',attempts:Number(job.attempts||0)+1,updated_at:new Date().toISOString()},'source_mint');
 console.log(JSON.stringify({event:'redeploy_prepared',sourceMint:job.source_mint,replicaMint:replica.publicKey.toBase58(),quoteMint:cfg.quoteMint,creator:user.toBase58(),creatorFeeBps:feeBps,holderReward:false,feeRecipient:user.toBase58(),recentBlockhash:tx.recentBlockhash||null,instruction:{programId:ix.programId.toBase58(),keys:ix.keys.map(k=>({pubkey:k.pubkey.toBase58(),isSigner:k.isSigner,isWritable:k.isWritable})),dataBase64:ix.data.toString('base64')}}));
