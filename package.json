@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "node src/worker.mjs",
+    "start:redeployer": "node src/redeploy-loop.mjs",
     "smoke": "node scripts/smoke.mjs",
     "decode:test":"node scripts/decode-test.mjs","prepare:redeploy":"node scripts/prepare-redeploy.mjs"
   },
