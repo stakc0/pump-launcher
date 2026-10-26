@@ -1,0 +1,10 @@
+const alphabet='123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+export function base58(bytes){let n=BigInt('0x'+(Buffer.from(bytes||[]).toString('hex')||'00')),out='';while(n>0n){out=alphabet[Number(n%58n)]+out;n/=58n}for(const b of Buffer.from(bytes||[])){if(b)break;out='1'+out}return out||'1'}
+export function readU64(b,o){return Number(b.readBigUInt64LE(o))}
+export function readI64(b,o){return Number(b.readBigInt64LE(o))}
+export function readU8(b,o){return b[o]}
+export function readBool(b,o){return b[o]!==0}
+export function readString(b,o){const n=b.readUInt32LE(o);const s=b.subarray(o+4,o+4+n).toString();return [s,o+4+n]}
+export function readPubkey(b,o){return [base58(b.subarray(o,o+32)),o+32]}
+export function decodeCreateEvent(bytes){const b=Buffer.from(bytes);const disc=[27,114,169,77,222,235,99,118];if(!disc.every((v,i)=>b[i]===v))return null;let o=8;let name;[name,o]=readString(b,o);let symbol;[symbol,o]=readString(b,o);let uri;[uri,o]=readString(b,o);let mint;[mint,o]=readPubkey(b,o);let bondingCurve;[bondingCurve,o]=readPubkey(b,o);let user;[user,o]=readPubkey(b,o);let creator;[creator,o]=readPubkey(b,o);const timestamp=readI64(b,o);o+=8;const virtualTokenReserves=readU64(b,o);o+=8;const virtualSolReserves=readU64(b,o);o+=8;const realTokenReserves=readU64(b,o);o+=8;const tokenTotalSupply=readU64(b,o);o+=8;let tokenProgram;[tokenProgram,o]=readPubkey(b,o);const isMayhemMode=readBool(b,o);o++;const isCashbackEnabled=readBool(b,o);o++;let quoteMint;[quoteMint,o]=readPubkey(b,o);const virtualQuoteReserves=readU64(b,o);o+=8;const creatorFeeBps=readU64(b,o);o+=8;const isHolderReward=readBool(b,o);o++;const depth=readU8(b,o);return {name,symbol,uri,mint,bondingCurve,user,creator,timestamp,virtualTokenReserves,virtualSolReserves,realTokenReserves,tokenTotalSupply,tokenProgram,isMayhemMode,isCashbackEnabled,quoteMint,virtualQuoteReserves,creatorFeeBps,isHolderReward,depth}}
+export function decodeProgramData(logs){const out=[];for(const line of logs||[]){if(!line.startsWith('Program data: '))continue;try{const e=decodeCreateEvent(Buffer.from(line.slice(14),'base64'));if(e)out.push(e)}catch{}}return out}

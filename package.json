@@ -1,0 +1,8 @@
+{
+  "name":"pump-launcher",
+  "version":"0.1.0",
+  "private":true,
+  "type":"module",
+  "scripts":{"start":"node src/worker.mjs","smoke":"node scripts/smoke.mjs","decode:test":"node scripts/decode-test.mjs"},
+  "dependencies":{"@triton-one/yellowstone-grpc":"^3.0.0"}
+}

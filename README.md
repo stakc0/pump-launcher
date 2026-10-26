@@ -1,0 +1,29 @@
+# pump-launcher
+
+Standalone Pump.fun autonomous launcher/indexer foundation.
+
+## Current behavior
+
+- Subscribes to the official Pump program through Yellowstone gRPC.
+- Decodes live `CreateEvent` payloads from the Pump IDL.
+- Fetches source metadata.
+- Persists source coins and raw event records into Supabase.
+- Detects the official `$PUMP` quote mint:
+  `pumpCmXqMfrsAkQ5r49WcJnRayYRqmXz6ae8H7H9Dfn`
+- Queues eligible `$PUMP`-paired source coins in `pump_redeployments`.
+- Uses idempotent database upserts so reconnects do not duplicate work.
+- Keeps transaction submission disabled until a dedicated deployer signer is intentionally configured.
+
+## Run
+
+```bash
+npm install
+PUMP_LAUNCHER_ENV=/root/.hermes/credentials/pump-launcher.env npm run smoke
+PUMP_LAUNCHER_ENV=/root/.hermes/credentials/pump-launcher.env npm start
+```
+
+The environment file is root-only and is never committed. The database schema is in `supabase/schema.sql`.
+
+## Important boundary
+
+The worker currently observes and queues. It does not sign or broadcast redeployment transactions. A dedicated deployer wallet, transaction builder, simulation gate, and explicit launch policy must be configured before enabling automatic broadcasts.

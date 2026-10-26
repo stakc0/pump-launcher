@@ -1,0 +1,5 @@
+import {readFileSync} from 'node:fs';
+try{for(const line of readFileSync(process.env.PUMP_LAUNCHER_ENV||'/root/.hermes/credentials/pump-launcher.env','utf8').split(/\r?\n/)){const m=line.match(/^([A-Z0-9_]+)=(.*)$/);if(m)process.env[m[1]]=m[2].replace(/^['"]|['"]$/g,'')}}catch{}
+const required=['PUMP_RPC_URL','PUMP_GRPC_ENDPOINT','PUMP_GRPC_X_TOKEN','SUPABASE_URL','SUPABASE_SERVICE_ROLE_KEY'];
+export const cfg={rpc:process.env.PUMP_RPC_URL,grpc:process.env.PUMP_GRPC_ENDPOINT,grpcToken:process.env.PUMP_GRPC_X_TOKEN,supabase:process.env.SUPABASE_URL,supabaseKey:process.env.SUPABASE_SERVICE_ROLE_KEY,projectRef:process.env.SUPABASE_PROJECT_REF,program:process.env.PUMP_PROGRAM_ID||'6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P',quoteMint:process.env.PUMP_QUOTE_MINT||'pumpCmXqMfrsAkQ5r49WcJnRayYRqmXz6ae8H7H9Dfn',autoDeploy:process.env.AUTO_DEPLOY==='true'};
+export function assertConfig(){const missing=required.filter(k=>!process.env[k]);if(missing.length)throw new Error(`Missing configuration: ${missing.join(', ')}`)}
