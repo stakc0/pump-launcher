@@ -9,7 +9,9 @@ assertConfig();
 const deployer=process.env.DEPLOYER_PUBLIC_KEY;
 if(!deployer)throw new Error('DEPLOYER_PUBLIC_KEY is required; no private key is read by this script');
 const user=new PublicKey(deployer);
-const rows=await get('pump_redeployments','status=eq.queued&quote_mint=eq.'+encodeURIComponent(cfg.quoteMint)+'&select=*&order=created_at.desc&limit=1');
+const maxAgeSeconds=Number(process.env.MAX_QUEUE_AGE_SECONDS||120);if(!Number.isInteger(maxAgeSeconds)||maxAgeSeconds<1)throw new Error('MAX_QUEUE_AGE_SECONDS must be a positive integer');
+const cutoff=new Date(Date.now()-maxAgeSeconds*1000).toISOString();
+const rows=await get('pump_redeployments','status=eq.queued&quote_mint=eq.'+encodeURIComponent(cfg.quoteMint)+'&created_at=gte.'+encodeURIComponent(cutoff)+'&select=*&order=created_at.desc&limit=1');
 if(!rows[0]){console.log(JSON.stringify({event:'nothing_queued'}));process.exit(0);}
 const job=rows[0];
 const source=(await get('pump_source_coins','source_mint=eq.'+encodeURIComponent(job.source_mint)+'&select=*'))[0];

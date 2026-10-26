@@ -30,7 +30,7 @@ To build an unsigned `create_v2` instruction for the oldest eligible queue item,
 DEPLOYER_PUBLIC_KEY=<public-address> PUMP_LAUNCHER_ENV=/root/.hermes/credentials/pump-launcher.env npm run prepare:redeploy
 ```
 
-This prepares the instruction and marks the queue item `building`; it does not sign, fund, buy, or broadcast anything.
+This prepares the instruction and marks the queue item `building`; it does not sign, fund, buy, or broadcast unless the guarded mainnet flags are explicitly set. The realtime-only age gate ignores queued jobs older than 120 seconds, preventing historical backlog launches.
 
 The environment file is root-only and is never committed. The database schema is in `supabase/schema.sql`.
 
