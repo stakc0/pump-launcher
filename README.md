@@ -10,6 +10,8 @@ Standalone Pump.fun autonomous launcher/indexer foundation.
 - Persists source coins and raw event records into Supabase.
 - Detects the official `$PUMP` quote mint:
   `pumpCmXqMfrsAkQ5r49WcJnRayYRqmXz6ae8H7H9Dfn`
+- Uses the maximum creator fee setting for custom `$PUMP` pairs: `300` bps = `3%`.
+- Explicitly sets `holderReward: false`, so creator fees route to the creator wallet, not holders.
 - Queues eligible `$PUMP`-paired source coins in `pump_redeployments`.
 - Uses idempotent database upserts so reconnects do not duplicate work.
 - Keeps transaction submission disabled until a dedicated deployer signer is intentionally configured.
