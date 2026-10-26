@@ -1,8 +1,16 @@
 {
-  "name":"pump-launcher",
-  "version":"0.1.0",
-  "private":true,
-  "type":"module",
-  "scripts":{"start":"node src/worker.mjs","smoke":"node scripts/smoke.mjs","decode:test":"node scripts/decode-test.mjs"},
-  "dependencies":{"@triton-one/yellowstone-grpc":"^3.0.0"}
+  "name": "pump-launcher",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node src/worker.mjs",
+    "smoke": "node scripts/smoke.mjs",
+    "decode:test":"node scripts/decode-test.mjs","prepare:redeploy":"node scripts/prepare-redeploy.mjs"
+  },
+  "dependencies": {
+    "@pump-fun/pump-sdk": "^4.1.0",
+    "@solana/web3.js": "^1.99.0",
+    "@triton-one/yellowstone-grpc": "^3.0.0"
+  }
 }

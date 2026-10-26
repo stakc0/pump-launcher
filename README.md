@@ -22,6 +22,14 @@ PUMP_LAUNCHER_ENV=/root/.hermes/credentials/pump-launcher.env npm run smoke
 PUMP_LAUNCHER_ENV=/root/.hermes/credentials/pump-launcher.env npm start
 ```
 
+To build an unsigned `create_v2` instruction for the oldest eligible queue item, configure only the public deployer address and run:
+
+```bash
+DEPLOYER_PUBLIC_KEY=<public-address> PUMP_LAUNCHER_ENV=/root/.hermes/credentials/pump-launcher.env npm run prepare:redeploy
+```
+
+This prepares the instruction and marks the queue item `building`; it does not sign, fund, buy, or broadcast anything.
+
 The environment file is root-only and is never committed. The database schema is in `supabase/schema.sql`.
 
 ## Important boundary
